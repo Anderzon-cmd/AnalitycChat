@@ -2,8 +2,21 @@ from typing import Union
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import spacy
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    "https://localhost:7065",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["POST"],
+    allow_headers=["*"],
+)
 
 try:
     nlp = spacy.load('es_core_news_sm')
@@ -43,6 +56,7 @@ def analyze_chat(item: Chat):
             group['count'] += 1
             group['texts'].append(entity["text"])
             group['texts'].sort()
+            group['entity'] = entity["entity"]
 
         entities_output = [group for group in entity_groups.values()]
         entity_order = tuple(sorted(entities_output, key=lambda x: x["count"], reverse=True))
