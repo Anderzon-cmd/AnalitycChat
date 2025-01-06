@@ -6,13 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-origins = [
-    "https://localhost:7065",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["POST"],
     allow_headers=["*"],
@@ -41,7 +37,6 @@ def analyze_chat(item: Chat):
 
         # nouns
         noun_groups = {}
-
         for noun in nouns:
             noun_groups[str.lower(noun)] = noun_groups.get(str.lower(noun), 0) + 1
 
@@ -52,12 +47,13 @@ def analyze_chat(item: Chat):
         verb_groups = {}
         for verb in verbs:
             verb_groups[str.lower(verb)] = verb_groups.get(str.lower(verb), 0) + 1
+
         verbs_output = [{"verb": verb, "count": count} for verb, count in verb_groups.items()]
         verb_order = tuple(sorted(verbs_output, key=lambda x: x["count"], reverse=True))
 
+        # entities
         entities = [{"text": entity.text, "entity": entity.label_} for entity in doc.ents]
         entity_groups = {}
-
         for entity in entities:
             group = entity_groups.setdefault(entity["entity"], {'count': 0, 'texts': []})
             group['count'] += 1
