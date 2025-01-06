@@ -39,14 +39,21 @@ def analyze_chat(item: Chat):
         nouns = [chunk.text for chunk in doc.noun_chunks]
         verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"]
 
+        # nouns
         noun_groups = {}
+
         for noun in nouns:
-            noun_groups[noun] = noun_groups.get(noun, 0) + 1
+            noun_groups[str.lower(noun)] = noun_groups.get(str.lower(noun), 0) + 1
 
         nouns_output = [{"noun": noun, "count": count} for noun, count in noun_groups.items()]
         noun_order = tuple(sorted(nouns_output, key=lambda x: x["count"], reverse=True))
 
-        verb_order = tuple(sorted(verbs))
+        # verbs
+        verb_groups = {}
+        for verb in verbs:
+            verb_groups[str.lower(verb)] = verb_groups.get(str.lower(verb), 0) + 1
+        verbs_output = [{"verb": verb, "count": count} for verb, count in verb_groups.items()]
+        verb_order = tuple(sorted(verbs_output, key=lambda x: x["count"], reverse=True))
 
         entities = [{"text": entity.text, "entity": entity.label_} for entity in doc.ents]
         entity_groups = {}
@@ -54,7 +61,7 @@ def analyze_chat(item: Chat):
         for entity in entities:
             group = entity_groups.setdefault(entity["entity"], {'count': 0, 'texts': []})
             group['count'] += 1
-            group['texts'].append(entity["text"])
+            group['texts'].append(str.lower( entity["text"]))
             group['texts'].sort()
             group['entity'] = entity["entity"]
 
